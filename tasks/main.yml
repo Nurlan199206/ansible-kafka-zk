@@ -1,0 +1,133 @@
+---
+- name: Print all available facts
+  ansible.builtin.debug:
+    var: ansible_facts
+
+- name: Install the package mc
+  ansible.builtin.apt:
+    name: mc
+    state: present
+
+- name: install net-tools
+  ansible.builtin.apt:
+    name: net-tools
+    state: present
+
+- name: install openjdk-11-jre
+  ansible.builtin.apt:
+    name: openjdk-11-jre
+    state: present
+
+- name: Download kafka
+  ansible.builtin.get_url:
+    url: https://downloads.apache.org/kafka/3.6.1/kafka_2.13-3.6.1.tgz
+    dest: /root/kafka_2.13-3.6.1.tgz
+    mode: '0644'
+
+- name: Download zookeeper
+  ansible.builtin.get_url:
+    url: https://dlcdn.apache.org/zookeeper/zookeeper-3.9.1/apache-zookeeper-3.9.1-bin.tar.gz
+    dest: /root/apache-zookeeper-3.9.1-bin.tar.gz
+    mode: '0644'
+
+- name: Extract kafka_2.13-3.6.1.tgz into /root
+  ansible.builtin.unarchive:
+    src: /root/kafka_2.13-3.6.1.tgz
+    dest: /root
+    remote_src: yes
+
+
+- name: Extract apache-zookeeper-3.9.1-bin.tar.gz into /root
+  ansible.builtin.unarchive:
+    src: /root/apache-zookeeper-3.9.1-bin.tar.gz
+    dest: /root
+    remote_src: yes
+
+- name: remove directories kafka
+  ansible.builtin.shell:
+    cmd: rm -rf /opt/*
+
+- name: move zookeeper to /opt folder
+  ansible.builtin.shell:
+    cmd: mv /root/apache-zookeeper-3.9.1-bin /opt/zookeeper
+
+- name: move kafka to /opt folder
+  ansible.builtin.shell:
+    cmd: mv /root/kafka_2.13-3.6.1 /opt/kafka
+
+- name: Copy systemd kafka service
+  ansible.builtin.copy:
+    src: kafka.service
+    dest: /etc/systemd/system/kafka.service
+
+- name: Copy systemd zookeeper service
+  ansible.builtin.copy:
+    src: kafka.service
+    dest: /etc/systemd/system/zookeeper.service
+
+- name: Copy server.properties to kafka-01
+  ansible.builtin.template:
+    src: ../files/server.properties-01.j2
+    dest: /opt/kafka/config/server.properties
+#    remote_src: yes
+  when: inventory_hostname == "kafka-zk-01"
+
+- name: Copy server.properties to kafka-02
+  ansible.builtin.template:
+    src: ../files/server.properties-02.j2
+    dest: /opt/kafka/config/server.properties
+  when: inventory_hostname == "kafka-zk-02"
+
+- name: Copy server.properties to kafka-03
+  ansible.builtin.template:
+    src: ../files/server.properties-03.j2
+    dest: /opt/kafka/config/server.properties
+  when: inventory_hostname == "kafka-zk-03"
+
+- name: Copy zoo.cfg to /opt/zookeeper/conf directory
+  ansible.builtin.template:
+    src: ../files/zoo.j2
+    dest: /opt/zookeeper/conf/zoo.cfg
+
+- name: Create /var/lib/zookeeper directory
+  ansible.builtin.file:
+    path: /var/lib/zookeeper/
+    state: directory
+    mode: '0755'
+
+- name: remove directories kafka
+  ansible.builtin.shell:
+    cmd: echo "1" > /var/lib/zookeeper/myid
+  when: inventory_hostname == "kafka-zk-01"
+
+- name: remove directories kafka
+  ansible.builtin.shell:
+    cmd: echo "2" > /var/lib/zookeeper/myid
+  when: inventory_hostname == "kafka-zk-02"
+
+- name: remove directories kafka
+  ansible.builtin.shell:
+    cmd: echo "3" > /var/lib/zookeeper/myid
+  when: inventory_hostname == "kafka-zk-03"
+
+- name: start kafka service
+  systemd:
+    state: started
+    daemon_reload: yes
+    name: kafka
+
+- name: start zookeeper service
+  systemd:
+    state: started
+    daemon_reload: yes
+    name: zookeeper
+
+- name: autostart kafka after system startup
+  ansible.builtin.systemd_service:
+    name: kafka
+    enabled: true
+
+- name: autostart zookeeper after system startup
+  ansible.builtin.systemd_service:
+    name: zookeeper
+    enabled: true

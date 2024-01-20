@@ -1,0 +1,4 @@
+[kafka]
+kafka-zk-01 ansible_host=192.168.1.141
+kafka-zk-02 ansible_host=192.168.1.142
+kafka-zk-03 ansible_host=192.168.1.143

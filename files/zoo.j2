@@ -1,0 +1,8 @@
+tickTime=2000
+dataDir=/var/lib/zookeeper
+clientPort=2181
+initLimit=5
+syncLimit=2
+server.1={{hostvars['kafka-zk-01'].ansible_default_ipv4.address}}:2888:3888
+server.2={{hostvars['kafka-zk-02'].ansible_default_ipv4.address}}:2888:3888
+server.3={{hostvars['kafka-zk-03'].ansible_default_ipv4.address}}:2888:3888
