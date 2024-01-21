@@ -1,7 +1,7 @@
 Role Name
 =========
 
-Playbook installing cluster of kafka and zookeeper on 3 nodes.
+Playbook installing 3 nodes cluster of kafka and zookeeper.
 
 Software version:
 
