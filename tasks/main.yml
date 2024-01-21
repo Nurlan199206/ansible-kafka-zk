@@ -18,6 +18,12 @@
     name: openjdk-11-jre
     state: present
 
+- name: install docker
+  ansible.builtin.apt:
+    name: docker.io
+    state: present
+  when: inventory_hostname == "kafka-zk-01"
+
 - name: Download kafka
   ansible.builtin.get_url:
     url: https://downloads.apache.org/kafka/3.6.1/kafka_2.13-3.6.1.tgz
@@ -131,3 +137,8 @@
   ansible.builtin.systemd_service:
     name: zookeeper
     enabled: true
+
+- name: run docker container for web management its available on node01 port 8085
+  ansible.builtin.shell:
+    cmd: docker run -d -it -p 8085:8080 -e DYNAMIC_CONFIG_ENABLED=true provectuslabs/kafka-ui:master
+  when: inventory_hostname == "kafka-zk-01"

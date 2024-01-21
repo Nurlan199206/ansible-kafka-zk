@@ -10,6 +10,7 @@ Kafka: ```2.13-3.6.1```
 ZooKeeper: ```3.9.1```
 JRE: ```11```
 
+Web UI for cluster management available on node01 port 8085
 
 Example Playbook
 ----------------
