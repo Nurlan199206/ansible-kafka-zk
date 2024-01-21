@@ -62,7 +62,7 @@
 
 - name: Copy systemd zookeeper service
   ansible.builtin.copy:
-    src: kafka.service
+    src: zookeeper.service
     dest: /etc/systemd/system/zookeeper.service
 
 - name: Copy server.properties to kafka-01
