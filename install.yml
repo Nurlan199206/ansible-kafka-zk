@@ -1,4 +1,4 @@
 - hosts: kafka
   become: yes
   roles:
-  - role: /root/kafka-zookeeper-cluster
+    - role: ../ansible-kafka-zk
